@@ -178,7 +178,7 @@ const Register = () => {
                 className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
               >
                 <option value="jobseeker">Job Seeker</option>
-                <option value="recruiter">Recruiter</option>
+                <option value="employer">Employer</option>
               </select>
             </div>
 

@@ -23,11 +23,16 @@ const Login = () => {
 
       login(res.data.token);
 
-      const role = JSON.parse(atob(res.data.token.split(".")[1])).role;
+      const decodedToken = JSON.parse(atob(res.data.token.split(".")[1]));
+      // Handle both possible role claim formats
+      const role = (decodedToken.role || decodedToken["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || "").toLowerCase();
 
-      if (role === "JobSeeker") navigate("/jobseeker/dashboard");
-      else if (role === "Recruiter") navigate("/recruiter/dashboard");
-      else navigate("/admin/dashboard");
+      console.log("Decoded token:", decodedToken);
+      console.log("User role:", role);
+
+      if (role === "jobseeker") navigate("/jobseeker/dashboard");
+      else if (role === "employer") navigate("/employer/dashboard");
+      else navigate("/login"); // Fallback to login if role unknown
 
     } catch (err) {
       setError("Invalid credentials. Please try again.");
