@@ -69,5 +69,63 @@ namespace JobPortal.API.Controllers
                 job.Id
             });
         }
+
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchJobs(
+    [FromQuery] string? keyword,
+    [FromQuery] string? location,
+    [FromQuery] string? skill,
+    [FromQuery] int? minSalary)
+        {
+            var query = _context.Jobs.AsQueryable();
+
+            // 🔍 Keyword search (Title / Description / Requirements)
+            if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                query = query.Where(j =>
+                    j.Title.Contains(keyword) ||
+                    j.Description.Contains(keyword) ||
+                    j.Requirements.Contains(keyword)
+                );
+            }
+
+            // 📍 Location filter
+            if (!string.IsNullOrWhiteSpace(location))
+            {
+                query = query.Where(j =>
+                    j.WorkLocation.Contains(location)
+                );
+            }
+
+            // 🧠 Skill-based filter (CORE FEATURE)
+            if (!string.IsNullOrWhiteSpace(skill))
+            {
+                query = query.Where(j =>
+                    j.Requirements.Contains(skill)
+                );
+            }
+
+            // 💰 Minimum salary (basic numeric handling)
+            if (minSalary.HasValue)
+            {
+                query = query.Where(j =>
+                    j.SalaryRange.Contains(minSalary.Value.ToString())
+                );
+            }
+
+            var results = await query
+                .OrderByDescending(j => j.PostedAt)
+                .Select(j => new
+                {
+                    j.Id,
+                    j.Title,
+                    j.WorkLocation,
+                    j.SalaryRange,
+                    j.PostedAt
+                })
+                .ToListAsync();
+
+            return Ok(results);
+        }
     }
 }
