@@ -4,7 +4,7 @@
 # Build output
 bin/
 obj/
-
+Backend/.vs
 # User-specific files
 *.user
 *.suo
