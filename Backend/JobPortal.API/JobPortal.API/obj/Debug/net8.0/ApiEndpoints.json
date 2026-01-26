@@ -1,5 +1,15 @@
 [
   {
+    "ContainingType": "JobPortal.API.Controllers.AIController",
+    "Method": "AnalyzeResume",
+    "RelativePath": "api/ai/analyze-resume",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "JobPortal.API.Controllers.JobApplicationsController",
     "Method": "ApplyJob",
     "RelativePath": "api/applications/apply",
@@ -115,6 +125,37 @@
         "Name": "dto",
         "Type": "JobPortal.API.DTOs.CreateJobDto",
         "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "JobPortal.API.Controllers.JobsController",
+    "Method": "SearchJobs",
+    "RelativePath": "api/jobs/search",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "keyword",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "location",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "skill",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "minSalary",
+        "Type": "System.Nullable\u00601[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
       }
     ],
     "ReturnTypes": []

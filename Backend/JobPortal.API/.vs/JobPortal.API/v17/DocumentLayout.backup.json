@@ -3,6 +3,14 @@
   "WorkspaceRootPath": "C:\\Users\\asusc\\OneDrive\\Desktop\\CDAC-Project\\JobPortal-git\\Backend\\JobPortal.API\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{C38ACB84-3A7B-4DD6-B92E-B4735BFDDDB2}|JobPortal.API\\JobPortal.API.csproj|c:\\users\\asusc\\onedrive\\desktop\\cdac-project\\jobportal-git\\backend\\jobportal.api\\jobportal.api\\controllers\\aicontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C38ACB84-3A7B-4DD6-B92E-B4735BFDDDB2}|JobPortal.API\\JobPortal.API.csproj|solutionrelative:jobportal.api\\controllers\\aicontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C38ACB84-3A7B-4DD6-B92E-B4735BFDDDB2}|JobPortal.API\\JobPortal.API.csproj|c:\\users\\asusc\\onedrive\\desktop\\cdac-project\\jobportal-git\\backend\\jobportal.api\\jobportal.api\\services\\resumetextextractor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C38ACB84-3A7B-4DD6-B92E-B4735BFDDDB2}|JobPortal.API\\JobPortal.API.csproj|solutionrelative:jobportal.api\\services\\resumetextextractor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{C38ACB84-3A7B-4DD6-B92E-B4735BFDDDB2}|JobPortal.API\\JobPortal.API.csproj|c:\\users\\asusc\\onedrive\\desktop\\cdac-project\\jobportal-git\\backend\\jobportal.api\\jobportal.api\\dtos\\appliedjobdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C38ACB84-3A7B-4DD6-B92E-B4735BFDDDB2}|JobPortal.API\\JobPortal.API.csproj|solutionrelative:jobportal.api\\dtos\\appliedjobdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -94,8 +102,34 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 13,
+          "SelectedChildIndex": 0,
           "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "AIController.cs",
+              "DocumentMoniker": "C:\\Users\\asusc\\OneDrive\\Desktop\\CDAC-Project\\JobPortal-git\\Backend\\JobPortal.API\\JobPortal.API\\Controllers\\AIController.cs",
+              "RelativeDocumentMoniker": "JobPortal.API\\Controllers\\AIController.cs",
+              "ToolTip": "C:\\Users\\asusc\\OneDrive\\Desktop\\CDAC-Project\\JobPortal-git\\Backend\\JobPortal.API\\JobPortal.API\\Controllers\\AIController.cs",
+              "RelativeToolTip": "JobPortal.API\\Controllers\\AIController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-26T14:46:17Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "ResumeTextExtractor.cs",
+              "DocumentMoniker": "C:\\Users\\asusc\\OneDrive\\Desktop\\CDAC-Project\\JobPortal-git\\Backend\\JobPortal.API\\JobPortal.API\\Services\\ResumeTextExtractor.cs",
+              "RelativeDocumentMoniker": "JobPortal.API\\Services\\ResumeTextExtractor.cs",
+              "ToolTip": "C:\\Users\\asusc\\OneDrive\\Desktop\\CDAC-Project\\JobPortal-git\\Backend\\JobPortal.API\\JobPortal.API\\Services\\ResumeTextExtractor.cs",
+              "RelativeToolTip": "JobPortal.API\\Services\\ResumeTextExtractor.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-26T14:46:13.246Z",
+              "EditorCaption": ""
+            },
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
@@ -114,7 +148,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 20,
+              "DocumentIndex": 22,
               "Title": "20260123151043_AddResumeFields.cs",
               "DocumentMoniker": "C:\\Users\\asusc\\OneDrive\\Desktop\\CDAC-Project\\JobPortal-git\\Backend\\JobPortal.API\\JobPortal.API\\Migrations\\20260123151043_AddResumeFields.cs",
               "RelativeDocumentMoniker": "JobPortal.API\\Migrations\\20260123151043_AddResumeFields.cs",
@@ -126,7 +160,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 8,
               "Title": "JobApplicationsController.cs",
               "DocumentMoniker": "C:\\Users\\asusc\\OneDrive\\Desktop\\CDAC-Project\\JobPortal-git\\Backend\\JobPortal.API\\JobPortal.API\\Controllers\\JobApplicationsController.cs",
               "RelativeDocumentMoniker": "JobPortal.API\\Controllers\\JobApplicationsController.cs",
@@ -138,7 +172,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 9,
               "Title": "AuthController.cs",
               "DocumentMoniker": "C:\\Users\\asusc\\OneDrive\\Desktop\\CDAC-Project\\JobPortal-git\\Backend\\JobPortal.API\\JobPortal.API\\Controllers\\AuthController.cs",
               "RelativeDocumentMoniker": "JobPortal.API\\Controllers\\AuthController.cs",
@@ -150,7 +184,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 6,
               "Title": "LoginRequestDto.cs",
               "DocumentMoniker": "C:\\Users\\asusc\\OneDrive\\Desktop\\CDAC-Project\\JobPortal-git\\Backend\\JobPortal.API\\JobPortal.API\\DTOs\\LoginRequestDto.cs",
               "RelativeDocumentMoniker": "JobPortal.API\\DTOs\\LoginRequestDto.cs",
@@ -162,7 +196,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 15,
               "Title": "User.cs",
               "DocumentMoniker": "C:\\Users\\asusc\\OneDrive\\Desktop\\CDAC-Project\\JobPortal-git\\Backend\\JobPortal.API\\JobPortal.API\\Models\\User.cs",
               "RelativeDocumentMoniker": "JobPortal.API\\Models\\User.cs",
@@ -174,7 +208,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 7,
               "Title": "JobsController.cs",
               "DocumentMoniker": "C:\\Users\\asusc\\OneDrive\\Desktop\\CDAC-Project\\JobPortal-git\\Backend\\JobPortal.API\\JobPortal.API\\Controllers\\JobsController.cs",
               "RelativeDocumentMoniker": "JobPortal.API\\Controllers\\JobsController.cs",
@@ -186,7 +220,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 5,
               "Title": "JobApplicantDto.cs",
               "DocumentMoniker": "C:\\Users\\asusc\\OneDrive\\Desktop\\CDAC-Project\\JobPortal-git\\Backend\\JobPortal.API\\JobPortal.API\\DTOs\\JobApplicantDto.cs",
               "RelativeDocumentMoniker": "JobPortal.API\\DTOs\\JobApplicantDto.cs",
@@ -198,7 +232,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 4,
               "Title": "CreateJobDto.cs",
               "DocumentMoniker": "C:\\Users\\asusc\\OneDrive\\Desktop\\CDAC-Project\\JobPortal-git\\Backend\\JobPortal.API\\JobPortal.API\\DTOs\\CreateJobDto.cs",
               "RelativeDocumentMoniker": "JobPortal.API\\DTOs\\CreateJobDto.cs",
@@ -210,7 +244,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 3,
               "Title": "ApplyJobDto.cs",
               "DocumentMoniker": "C:\\Users\\asusc\\OneDrive\\Desktop\\CDAC-Project\\JobPortal-git\\Backend\\JobPortal.API\\JobPortal.API\\DTOs\\ApplyJobDto.cs",
               "RelativeDocumentMoniker": "JobPortal.API\\DTOs\\ApplyJobDto.cs",
@@ -222,7 +256,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 2,
               "Title": "AppliedJobDto.cs",
               "DocumentMoniker": "C:\\Users\\asusc\\OneDrive\\Desktop\\CDAC-Project\\JobPortal-git\\Backend\\JobPortal.API\\JobPortal.API\\DTOs\\AppliedJobDto.cs",
               "RelativeDocumentMoniker": "JobPortal.API\\DTOs\\AppliedJobDto.cs",
@@ -235,7 +269,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 11,
               "Title": "ApplicationDbContext.cs",
               "DocumentMoniker": "C:\\Users\\asusc\\OneDrive\\Desktop\\CDAC-Project\\JobPortal-git\\Backend\\JobPortal.API\\JobPortal.API\\Data\\ApplicationDbContext.cs",
               "RelativeDocumentMoniker": "JobPortal.API\\Data\\ApplicationDbContext.cs",
@@ -247,7 +281,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 12,
               "Title": "WeatherForecastController.cs",
               "DocumentMoniker": "C:\\Users\\asusc\\OneDrive\\Desktop\\CDAC-Project\\JobPortal-git\\Backend\\JobPortal.API\\JobPortal.API\\Controllers\\WeatherForecastController.cs",
               "RelativeDocumentMoniker": "JobPortal.API\\Controllers\\WeatherForecastController.cs",
@@ -259,7 +293,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 13,
               "Title": "JobSeekerProfile.cs",
               "DocumentMoniker": "C:\\Users\\asusc\\OneDrive\\Desktop\\CDAC-Project\\JobPortal-git\\Backend\\JobPortal.API\\JobPortal.API\\Models\\JobSeekerProfile.cs",
               "RelativeDocumentMoniker": "JobPortal.API\\Models\\JobSeekerProfile.cs",
@@ -271,7 +305,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 10,
               "Title": "ResumeController.cs",
               "DocumentMoniker": "C:\\Users\\asusc\\OneDrive\\Desktop\\CDAC-Project\\JobPortal-git\\Backend\\JobPortal.API\\JobPortal.API\\Controllers\\ResumeController.cs",
               "RelativeDocumentMoniker": "JobPortal.API\\Controllers\\ResumeController.cs",
@@ -283,7 +317,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 14,
               "Title": "JobApplication.cs",
               "DocumentMoniker": "C:\\Users\\asusc\\OneDrive\\Desktop\\CDAC-Project\\JobPortal-git\\Backend\\JobPortal.API\\JobPortal.API\\Models\\JobApplication.cs",
               "RelativeDocumentMoniker": "JobPortal.API\\Models\\JobApplication.cs",
@@ -295,7 +329,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 16,
               "Title": "ResumeAnalysis.cs",
               "DocumentMoniker": "C:\\Users\\asusc\\OneDrive\\Desktop\\CDAC-Project\\JobPortal-git\\Backend\\JobPortal.API\\JobPortal.API\\Models\\ResumeAnalysis.cs",
               "RelativeDocumentMoniker": "JobPortal.API\\Models\\ResumeAnalysis.cs",
@@ -307,7 +341,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 17,
               "Title": "EmployerProfile.cs",
               "DocumentMoniker": "C:\\Users\\asusc\\OneDrive\\Desktop\\CDAC-Project\\JobPortal-git\\Backend\\JobPortal.API\\JobPortal.API\\Models\\EmployerProfile.cs",
               "RelativeDocumentMoniker": "JobPortal.API\\Models\\EmployerProfile.cs",
@@ -319,7 +353,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 18,
               "Title": "Job.cs",
               "DocumentMoniker": "C:\\Users\\asusc\\OneDrive\\Desktop\\CDAC-Project\\JobPortal-git\\Backend\\JobPortal.API\\JobPortal.API\\Models\\Job.cs",
               "RelativeDocumentMoniker": "JobPortal.API\\Models\\Job.cs",
@@ -331,7 +365,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 19,
+              "DocumentIndex": 21,
               "Title": "launchSettings.json",
               "DocumentMoniker": "C:\\Users\\asusc\\OneDrive\\Desktop\\CDAC-Project\\JobPortal-git\\Backend\\JobPortal.API\\JobPortal.API\\Properties\\launchSettings.json",
               "RelativeDocumentMoniker": "JobPortal.API\\Properties\\launchSettings.json",
@@ -343,7 +377,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 18,
+              "DocumentIndex": 20,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\asusc\\OneDrive\\Desktop\\CDAC-Project\\JobPortal-git\\Backend\\JobPortal.API\\JobPortal.API\\Program.cs",
               "RelativeDocumentMoniker": "JobPortal.API\\Program.cs",
@@ -355,7 +389,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 19,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\Users\\asusc\\OneDrive\\Desktop\\CDAC-Project\\JobPortal-git\\Backend\\JobPortal.API\\JobPortal.API\\appsettings.json",
               "RelativeDocumentMoniker": "JobPortal.API\\appsettings.json",

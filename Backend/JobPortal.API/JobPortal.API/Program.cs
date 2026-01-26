@@ -13,6 +13,9 @@ namespace JobPortal.API
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            //For Gemini Integration
+            builder.Services.AddHttpClient();
+
             // Add services to the container.
 
             builder.Services.AddControllers();
