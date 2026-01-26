@@ -1,7 +1,7 @@
 import { useState, useContext } from "react";
 import axios from "../../api/axios";
 import { AuthContext } from "../../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -126,9 +126,9 @@ const Login = () => {
           {/* Sign Up Link */}
           <p className="mt-8 text-center text-gray-600">
             Don't have an account?{" "}
-            <a href="/register" className="text-gray-900 font-semibold hover:underline">
+            <Link to="/register" className="text-gray-900 font-semibold hover:underline">
               Create an account
-            </a>
+            </Link>
           </p>
 
           {/* Mobile Footer */}
