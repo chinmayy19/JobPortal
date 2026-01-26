@@ -1,4 +1,4 @@
-﻿using JobPortal.API.Data;
+using JobPortal.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -15,6 +15,18 @@ namespace JobPortal.API
 
             //For Gemini Integration
             builder.Services.AddHttpClient();
+
+            // Add CORS policy
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowFrontend", policy =>
+                {
+                    policy.WithOrigins("http://localhost:5173", "http://localhost:5174")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod()
+                          .AllowCredentials();
+                });
+            });
 
             // Add services to the container.
 
@@ -65,7 +77,9 @@ namespace JobPortal.API
 
             app.UseHttpsRedirection();
 
-            app.UseAuthentication(); // 🔑 MUST be first
+            app.UseCors("AllowFrontend");
+
+            app.UseAuthentication(); // ?? MUST be first
             app.UseAuthorization();
 
 
@@ -76,3 +90,4 @@ namespace JobPortal.API
         }
     }
 }
+
