@@ -63,7 +63,7 @@ namespace JobPortal.API.Controllers
     """;
 
             var client = _httpClientFactory.CreateClient();
-            var apiKey = _configuration["GeminiAI:ApiKey"];
+            var apiKey = Environment.GetEnvironmentVariable("GEMINI_API_KEY");
 
             var requestBody = new
             {

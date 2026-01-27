@@ -25,7 +25,7 @@ namespace JobPortal.API.Services.ExternalJobs
         {
             _httpClient = httpClient;
             _configuration = configuration;
-            _apiKey = _configuration["JSearch:ApiKey"];
+            _apiKey = Environment.GetEnvironmentVariable("JSEARCH_API_KEY");
         }
 
         public async Task<List<ExternalJobDto>> FetchJobs(string keyword, string location)

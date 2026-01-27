@@ -86,7 +86,11 @@ namespace JobPortal.API.Controllers
         //Add JWT Generator Method
         private string GenerateJwtToken(User user)
         {
-            var jwtSettings = _configuration.GetSection("Jwt");
+            // Read JWT settings from environment variables
+            var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY");
+            var jwtIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER");
+            var jwtAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE");
+            var jwtExpiryMinutes = Environment.GetEnvironmentVariable("JWT_EXPIRY_MINUTES");
 
             var claims = new[]
             {
@@ -97,17 +101,17 @@ namespace JobPortal.API.Controllers
     };
 
             var key = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(jwtSettings["Key"])
+                Encoding.UTF8.GetBytes(jwtKey!)
             );
 
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(
-                issuer: jwtSettings["Issuer"],
-                audience: jwtSettings["Audience"],
+                issuer: jwtIssuer,
+                audience: jwtAudience,
                 claims: claims,
                 expires: DateTime.UtcNow.AddMinutes(
-                    int.Parse(jwtSettings["ExpiryMinutes"])
+                    int.Parse(jwtExpiryMinutes ?? "60")
                 ),
                 signingCredentials: creds
             );
