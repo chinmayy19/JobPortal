@@ -80,3 +80,26 @@ export const withdrawApplication = async (applicationId) => {
   const response = await axios.delete(`/applications/${applicationId}/withdraw`);
   return response.data;
 };
+
+// ============================================
+// EXTERNAL JOB APIs (aggregated from multiple platforms)
+// ============================================
+
+// Search external jobs from multiple platforms (Remotive, Arbeitnow, etc.)
+// CHANGE: New function to fetch jobs from external platforms
+// These jobs redirect to external sites for application
+export const searchExternalJobs = async (keyword = "", location = "", source = "") => {
+  const params = new URLSearchParams();
+  if (keyword) params.append("keyword", keyword);
+  if (location) params.append("location", location);
+  if (source) params.append("source", source);
+  
+  const response = await axios.get(`/external-jobs/search?${params.toString()}`);
+  return response.data;
+};
+
+// Get available external job sources
+export const getExternalJobSources = async () => {
+  const response = await axios.get("/external-jobs/sources");
+  return response.data;
+};

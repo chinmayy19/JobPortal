@@ -7,19 +7,22 @@
  * 3. View their applied jobs with status tracking
  * 4. Search and filter jobs
  * 5. Withdraw/Revoke applications (fix misclicks)
+ * 6. Browse external jobs from multiple platforms (Remotive, Arbeitnow)
  * 
  * BACKEND ENDPOINTS USED:
  * - GET /api/jobs - Fetches all available jobs (public endpoint)
  * - POST /api/applications/apply - Apply for a job with details (requires jobseeker auth)
  * - GET /api/applications/my - Get jobseeker's applied jobs (requires auth)
  * - DELETE /api/applications/{id}/withdraw - Withdraw an application (requires auth)
+ * - GET /api/external-jobs/search - Fetch jobs from external platforms (public)
  */
 
 import { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 // CHANGE: Added withdrawApplication for revoking job applications
-import { getAllJobs, applyForJob, getMyAppliedJobs, withdrawApplication } from "../../api/jobsApi";
+// CHANGE: Added searchExternalJobs for external job listings
+import { getAllJobs, applyForJob, getMyAppliedJobs, withdrawApplication, searchExternalJobs } from "../../api/jobsApi";
 
 const JobSeekerDashboard = () => {
   const { auth, logout } = useContext(AuthContext);
@@ -47,7 +50,14 @@ const JobSeekerDashboard = () => {
   // CHANGE: Search/filter functionality
   const [searchTerm, setSearchTerm] = useState("");
   // CHANGE: Toggle between viewing all jobs and applied jobs
-  const [activeTab, setActiveTab] = useState("browse"); // "browse" or "applied"
+  const [activeTab, setActiveTab] = useState("browse"); // "browse", "applied", or "external"
+
+  // CHANGE: External Jobs State
+  const [externalJobs, setExternalJobs] = useState([]);
+  const [externalJobsLoading, setExternalJobsLoading] = useState(false);
+  const [externalSearchKeyword, setExternalSearchKeyword] = useState("");
+  const [externalSearchLocation, setExternalSearchLocation] = useState("");
+  const [externalSourceFilter, setExternalSourceFilter] = useState("");
 
   // CHANGE: Application Modal State
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
@@ -92,6 +102,41 @@ const JobSeekerDashboard = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // ============================================
+  // EXTERNAL JOBS FETCHING
+  // ============================================
+
+  // CHANGE: Fetch external jobs from multiple platforms
+  const fetchExternalJobs = async () => {
+    setExternalJobsLoading(true);
+    try {
+      const response = await searchExternalJobs(
+        externalSearchKeyword,
+        externalSearchLocation,
+        externalSourceFilter
+      );
+      setExternalJobs(response.jobs || []);
+    } catch (err) {
+      console.error("Error fetching external jobs:", err);
+      setError("Failed to fetch external jobs. Please try again.");
+    } finally {
+      setExternalJobsLoading(false);
+    }
+  };
+
+  // CHANGE: Auto-fetch external jobs when switching to external tab or on filter change
+  useEffect(() => {
+    if (activeTab === "external") {
+      fetchExternalJobs();
+    }
+  }, [activeTab, externalSourceFilter]);
+
+  // CHANGE: Handle external job search
+  const handleExternalJobSearch = (e) => {
+    e.preventDefault();
+    fetchExternalJobs();
   };
 
   // ============================================
@@ -248,6 +293,21 @@ const JobSeekerDashboard = () => {
     });
   };
 
+  // CHANGE: Format relative time (e.g., "2 days ago")
+  const formatRelativeTime = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now - date);
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) return "Today";
+    if (diffDays === 1) return "Yesterday";
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+    return formatDate(dateString);
+  };
+
   // CHANGE: Get status badge color based on application status
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
@@ -338,6 +398,16 @@ const JobSeekerDashboard = () => {
                 }`}
               >
                 My Applications ({appliedJobs.length})
+              </button>
+              <button
+                onClick={() => setActiveTab("external")}
+                className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  activeTab === "external"
+                    ? "border-indigo-500 text-indigo-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
+              >
+                🌐 External Jobs
               </button>
             </nav>
           </div>
@@ -548,6 +618,221 @@ const JobSeekerDashboard = () => {
                       </div>
                     </div>
                   ))
+                )}
+              </div>
+            )}
+
+            {/* CHANGE: External Jobs Tab - Jobs from multiple platforms */}
+            {activeTab === "external" && (
+              <div className="space-y-6">
+                {/* External Jobs Search Form */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <h3 className="text-lg font-medium text-gray-900">
+                      🔍 Search Jobs from Top Platforms
+                    </h3>
+                    <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full">
+                      LinkedIn, Indeed, Glassdoor, Naukri & more
+                    </span>
+                  </div>
+                  <form onSubmit={handleExternalJobSearch} className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Job Title / Keyword</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. React Developer, Data Analyst..."
+                          value={externalSearchKeyword}
+                          onChange={(e) => setExternalSearchKeyword(e.target.value)}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Pune, Mumbai, Bangalore, Remote..."
+                          value={externalSearchLocation}
+                          onChange={(e) => setExternalSearchLocation(e.target.value)}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Source</label>
+                        <select
+                          value={externalSourceFilter}
+                          onChange={(e) => setExternalSourceFilter(e.target.value)}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        >
+                          <option value="">All Sources (Recommended)</option>
+                          <option value="jsearch">LinkedIn, Indeed, Glassdoor</option>
+                          <option value="remotive">Remotive (Remote Jobs)</option>
+                          <option value="arbeitnow">Arbeitnow (European)</option>
+                        </select>
+                      </div>
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={externalJobsLoading}
+                      className="inline-flex items-center px-6 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50"
+                    >
+                      {externalJobsLoading ? (
+                        <>
+                          <svg className="animate-spin w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Searching...
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                          </svg>
+                          Search Jobs
+                        </>
+                      )}
+                    </button>
+                  </form>
+                </div>
+
+                {/* Results Count */}
+                {externalJobs.length > 0 && (
+                  <div className="text-sm text-gray-600">
+                    Found <span className="font-semibold">{externalJobs.length}</span> jobs from external platforms
+                  </div>
+                )}
+
+                {/* External Jobs Loading State */}
+                {externalJobsLoading ? (
+                  <div className="flex justify-center items-center py-12">
+                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600"></div>
+                  </div>
+                ) : externalJobs.length === 0 ? (
+                  <div className="text-center py-12 bg-white rounded-lg shadow">
+                    <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                    </svg>
+                    <h3 className="mt-2 text-lg font-medium text-gray-900">Search External Jobs</h3>
+                    <p className="mt-1 text-gray-500">
+                      Enter keywords to search jobs from Remotive, Arbeitnow, and more platforms.
+                    </p>
+                  </div>
+                ) : (
+                  /* External Jobs List */
+                  <div className="space-y-4">
+                    {externalJobs.map((job, index) => (
+                      <div
+                        key={`${job.source}-${index}`}
+                        className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
+                      >
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            {/* Source Badge */}
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                {job.sourceLogo && (
+                                  <img src={job.sourceLogo} alt="" className="w-3 h-3 mr-1" />
+                                )}
+                                {job.source}
+                              </span>
+                              {job.jobType && (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                  {job.jobType}
+                                </span>
+                              )}
+                              {job.category && (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                  {job.category}
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Job Title */}
+                            <h3 className="text-xl font-semibold text-gray-900">{job.title}</h3>
+
+                            {/* Company */}
+                            <div className="mt-1 flex items-center gap-2">
+                              {job.companyLogo && (
+                                <img src={job.companyLogo} alt="" className="w-6 h-6 rounded" />
+                              )}
+                              <span className="text-gray-700 font-medium">{job.company}</span>
+                            </div>
+
+                            {/* Job Details */}
+                            <div className="mt-2 flex flex-wrap gap-3 text-sm text-gray-500">
+                              {job.location && (
+                                <span className="flex items-center">
+                                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                  </svg>
+                                  {job.location}
+                                </span>
+                              )}
+                              {job.salaryRange && (
+                                <span className="flex items-center">
+                                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                  {job.salaryRange}
+                                </span>
+                              )}
+                              {job.postedAt && (
+                                <span className="flex items-center">
+                                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                  </svg>
+                                  {formatRelativeTime(job.postedAt)}
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Tags */}
+                            {job.tags && job.tags.length > 0 && (
+                              <div className="mt-3 flex flex-wrap gap-1">
+                                {job.tags.slice(0, 5).map((tag, i) => (
+                                  <span
+                                    key={i}
+                                    className="inline-block px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded"
+                                  >
+                                    {tag}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Apply Button - Redirects to external site */}
+                          <div className="ml-4 flex flex-col items-end gap-2">
+                            <a
+                              href={job.applyUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors"
+                            >
+                              Apply on {job.source}
+                              <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                              </svg>
+                            </a>
+                          </div>
+                        </div>
+
+                        {/* Job Description Preview */}
+                        {job.description && (
+                          <div className="mt-4">
+                            <p
+                              className="text-gray-600 text-sm line-clamp-3"
+                              dangerouslySetInnerHTML={{
+                                __html: job.description.substring(0, 300) + (job.description.length > 300 ? "..." : "")
+                              }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
             )}

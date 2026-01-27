@@ -1,4 +1,6 @@
 using JobPortal.API.Data;
+using JobPortal.API.Services;
+using JobPortal.API.Services.ExternalJobs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -15,6 +17,11 @@ namespace JobPortal.API
 
             //For Gemini Integration
             builder.Services.AddHttpClient();
+
+            // Register External Job Services
+            builder.Services.AddHttpClient<RemotiveJobService>();
+            builder.Services.AddHttpClient<ArbeitnowJobService>();
+            builder.Services.AddHttpClient<JSearchJobService>();
 
             // Add CORS policy
             builder.Services.AddCors(options =>
