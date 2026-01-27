@@ -4,6 +4,8 @@ import { AuthProvider } from './context/AuthContext'
 import Login from './pages/auth/Login'
 import Register from './pages/auth/Register'
 import EmployerDashboard from './pages/employer/Dashboard'
+// CHANGE: Import the new JobSeeker Dashboard component
+import JobSeekerDashboard from './pages/jobseeker/Dashboard'
 import ProtectedRoute from './components/ProtectedRoute'
 import './App.css'
 
@@ -22,6 +24,15 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={["employer"]}>
                   <EmployerDashboard />
+                </ProtectedRoute>
+              }
+            />
+            {/* CHANGE: New route for JobSeeker Dashboard */}
+            <Route
+              path="/jobseeker/dashboard"
+              element={
+                <ProtectedRoute allowedRoles={["jobseeker"]}>
+                  <JobSeekerDashboard />
                 </ProtectedRoute>
               }
             />

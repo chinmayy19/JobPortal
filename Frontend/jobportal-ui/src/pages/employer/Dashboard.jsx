@@ -1,7 +1,8 @@
 import { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { getMyJobs, createJob, updateJob, deleteJob } from "../../api/jobsApi";
+// CHANGE: Added getApplicantsForJob and updateApplicationStatus for managing applicants
+import { getMyJobs, createJob, updateJob, deleteJob, getApplicantsForJob, updateApplicationStatus } from "../../api/jobsApi";
 
 const EmployerDashboard = () => {
   const { auth, logout } = useContext(AuthContext);
@@ -14,6 +15,13 @@ const EmployerDashboard = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+
+  // CHANGE: New state for applicants modal
+  const [isApplicantsModalOpen, setIsApplicantsModalOpen] = useState(false);
+  const [selectedJobForApplicants, setSelectedJobForApplicants] = useState(null);
+  const [applicants, setApplicants] = useState([]);
+  const [isLoadingApplicants, setIsLoadingApplicants] = useState(false);
+  const [updatingStatusId, setUpdatingStatusId] = useState(null);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -125,6 +133,76 @@ const EmployerDashboard = () => {
       month: "short",
       day: "numeric",
     });
+  };
+
+  // ============================================
+  // CHANGE: New functions for managing applicants
+  // ============================================
+
+  // Open the applicants modal and fetch applicants for a job
+  const openApplicantsModal = async (job) => {
+    setSelectedJobForApplicants(job);
+    setIsApplicantsModalOpen(true);
+    setIsLoadingApplicants(true);
+    
+    try {
+      const data = await getApplicantsForJob(job.id);
+      setApplicants(data);
+    } catch (err) {
+      setError("Failed to fetch applicants. Please try again.");
+    } finally {
+      setIsLoadingApplicants(false);
+    }
+  };
+
+  // Close the applicants modal
+  const closeApplicantsModal = () => {
+    setIsApplicantsModalOpen(false);
+    setSelectedJobForApplicants(null);
+    setApplicants([]);
+  };
+
+  // Update applicant status (Accept/Reject/Pending etc.)
+  const handleStatusUpdate = async (applicationId, newStatus) => {
+    setUpdatingStatusId(applicationId);
+    try {
+      await updateApplicationStatus(applicationId, newStatus);
+      
+      // Update local state to reflect the change
+      setApplicants(prev => 
+        prev.map(app => 
+          app.applicationId === applicationId 
+            ? { ...app, status: newStatus } 
+            : app
+        )
+      );
+      
+      setSuccessMessage(`Application status updated to "${newStatus}"`);
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to update status. Please try again.");
+      setTimeout(() => setError(""), 5000);
+    } finally {
+      setUpdatingStatusId(null);
+    }
+  };
+
+  // Get status badge color
+  const getStatusColor = (status) => {
+    switch (status?.toLowerCase()) {
+      case 'accepted':
+        return 'bg-green-100 text-green-800 border-green-200';
+      case 'rejected':
+        return 'bg-red-100 text-red-800 border-red-200';
+      case 'shortlisted':
+        return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'reviewed':
+        return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'applied':
+      case 'pending':
+      default:
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+    }
   };
 
   return (
@@ -277,6 +355,16 @@ const EmployerDashboard = () => {
                   </div>
                   
                   <div className="flex lg:flex-col gap-2 lg:gap-2">
+                    {/* CHANGE: New "View Applicants" button */}
+                    <button
+                      onClick={() => openApplicantsModal(job)}
+                      className="flex-1 lg:flex-none inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-indigo-600 bg-white border border-indigo-200 rounded-lg hover:bg-indigo-50 transition-colors"
+                    >
+                      <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                      Applicants
+                    </button>
                     <button
                       onClick={() => openEditModal(job)}
                       className="flex-1 lg:flex-none inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
@@ -458,6 +546,182 @@ const EmployerDashboard = () => {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CHANGE: New Applicants Modal for viewing and updating application status */}
+      {isApplicantsModalOpen && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex min-h-screen items-center justify-center p-4">
+            {/* Backdrop */}
+            <div
+              className="fixed inset-0 bg-black/50 transition-opacity"
+              onClick={closeApplicantsModal}
+            />
+
+            {/* Modal Content */}
+            <div className="relative w-full max-w-4xl bg-white rounded-2xl shadow-xl max-h-[90vh] overflow-hidden">
+              {/* Modal Header */}
+              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900">
+                    Applicants for "{selectedJobForApplicants?.title}"
+                  </h3>
+                  <p className="mt-1 text-sm text-gray-600">
+                    Review and update the status of applications
+                  </p>
+                </div>
+                <button
+                  onClick={closeApplicantsModal}
+                  className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Modal Body */}
+              <div className="p-6 overflow-y-auto max-h-[60vh]">
+                {isLoadingApplicants ? (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+                  </div>
+                ) : applicants.length === 0 ? (
+                  <div className="text-center py-12">
+                    <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <h3 className="mt-2 text-lg font-medium text-gray-900">No applicants yet</h3>
+                    <p className="mt-1 text-gray-500">
+                      When candidates apply for this job, they'll appear here.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {applicants.map((applicant) => (
+                      <div
+                        key={applicant.applicationId}
+                        className="bg-gray-50 rounded-xl border border-gray-200 p-5"
+                      >
+                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                          <div className="flex items-start gap-4 flex-1">
+                            {/* Avatar */}
+                            <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center shrink-0">
+                              <span className="text-lg font-semibold text-indigo-600">
+                                {applicant.applicantName?.charAt(0)?.toUpperCase() || "?"}
+                              </span>
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-gray-900">{applicant.applicantName}</h4>
+                              <p className="text-sm text-gray-600">{applicant.applicantEmail}</p>
+                              
+                              {/* CHANGE: Additional applicant details for recruiters */}
+                              <div className="mt-2 flex flex-wrap gap-3 text-sm">
+                                {/* Phone Number */}
+                                {applicant.applicantPhone && (
+                                  <span className="flex items-center text-gray-600">
+                                    <svg className="w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                    </svg>
+                                    {applicant.applicantPhone}
+                                  </span>
+                                )}
+                                
+                                {/* Location Preference */}
+                                {applicant.locationPreference && (
+                                  <span className="flex items-center text-gray-600">
+                                    <svg className="w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                    Prefers: {applicant.locationPreference}
+                                  </span>
+                                )}
+                              </div>
+                              
+                              {/* CHANGE: Skills */}
+                              {applicant.skills && (
+                                <div className="mt-2">
+                                  <div className="flex flex-wrap gap-1">
+                                    {applicant.skills.split(',').slice(0, 5).map((skill, index) => (
+                                      <span
+                                        key={index}
+                                        className="px-2 py-0.5 text-xs font-medium bg-indigo-50 text-indigo-700 rounded-full"
+                                      >
+                                        {skill.trim()}
+                                      </span>
+                                    ))}
+                                    {applicant.skills.split(',').length > 5 && (
+                                      <span className="px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-500 rounded-full">
+                                        +{applicant.skills.split(',').length - 5} more
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                              
+                              <p className="text-xs text-gray-500 mt-2">
+                                Applied on {formatDate(applicant.appliedAt)}
+                              </p>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-3">
+                            {/* Current Status Badge */}
+                            <span className={`px-3 py-1 text-xs font-medium rounded-full border ${getStatusColor(applicant.status)}`}>
+                              {applicant.status || "Applied"}
+                            </span>
+                            
+                            {/* Status Update Dropdown */}
+                            <div className="relative">
+                              <select
+                                value={applicant.status || "Applied"}
+                                onChange={(e) => handleStatusUpdate(applicant.applicationId, e.target.value)}
+                                disabled={updatingStatusId === applicant.applicationId}
+                                className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                <option value="Applied">Applied</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Reviewed">Reviewed</option>
+                                <option value="Shortlisted">Shortlisted</option>
+                                <option value="Accepted">Accepted</option>
+                                <option value="Rejected">Rejected</option>
+                              </select>
+                              {updatingStatusId === applicant.applicationId ? (
+                                <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
+                                </div>
+                              ) : (
+                                <svg
+                                  className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Modal Footer */}
+              <div className="flex items-center justify-end p-6 border-t border-gray-200 bg-gray-50 rounded-b-2xl">
+                <button
+                  onClick={closeApplicantsModal}
+                  className="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         </div>

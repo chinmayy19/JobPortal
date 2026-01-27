@@ -13,6 +13,9 @@ namespace JobPortal.API.Models
         public string? ResumePath { get; set; } //Resume File Path
 
         public string? Skills { get; set; } // JSON stored as string
+        
+        // CHANGE: New field - Preferred work location for jobseeker
+        public string? LocationPreference { get; set; }
 
         public User User { get; set; }
     }
