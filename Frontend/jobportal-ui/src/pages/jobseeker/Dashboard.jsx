@@ -332,23 +332,42 @@ const JobSeekerDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* CHANGE: Navigation Header */}
-      <nav className="bg-white shadow-sm border-b">
+      {/* Navigation Header */}
+      <nav className="bg-white shadow-sm border-b sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-indigo-600">JobPortal</h1>
-              <span className="ml-3 text-sm text-gray-500">Job Seeker</span>
+            <div className="flex items-center gap-8">
+              <div className="flex items-center">
+                <h1 className="text-2xl font-bold text-gray-900">JobPortal</h1>
+                <span className="ml-3 px-2 py-0.5 text-xs font-medium bg-gray-900 text-white rounded-full">
+                  Job Seeker
+                </span>
+              </div>
+              {/* Nav Links */}
+              <div className="hidden md:flex items-center gap-6">
+                <button
+                  onClick={() => navigate("/jobseeker/dashboard")}
+                  className="text-sm font-medium text-gray-900"
+                >
+                  Dashboard
+                </button>
+                <button
+                  onClick={() => navigate("/jobseeker/profile")}
+                  className="text-sm font-medium text-gray-600 hover:text-gray-900"
+                >
+                  Profile & Resume
+                </button>
+              </div>
             </div>
             <div className="flex items-center gap-4">
-              <span className="text-gray-700">
-                Welcome, <span className="font-medium">{auth?.user?.fullName || "User"}</span>
+              <span className="text-sm text-gray-600">
+                {auth?.user?.email || auth?.user?.fullName || "User"}
               </span>
               <button
                 onClick={handleLogout}
-                className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
               >
-                Logout
+                Sign out
               </button>
             </div>
           </div>
@@ -375,7 +394,7 @@ const JobSeekerDashboard = () => {
           </div>
         )}
 
-        {/* CHANGE: Tab Navigation */}
+        {/* Tab Navigation */}
         <div className="mb-6">
           <div className="border-b border-gray-200">
             <nav className="-mb-px flex space-x-8">
@@ -383,7 +402,7 @@ const JobSeekerDashboard = () => {
                 onClick={() => setActiveTab("browse")}
                 className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                   activeTab === "browse"
-                    ? "border-indigo-500 text-indigo-600"
+                    ? "border-gray-900 text-gray-900"
                     : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 }`}
               >
@@ -393,7 +412,7 @@ const JobSeekerDashboard = () => {
                 onClick={() => setActiveTab("applied")}
                 className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                   activeTab === "applied"
-                    ? "border-indigo-500 text-indigo-600"
+                    ? "border-gray-900 text-gray-900"
                     : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 }`}
               >
@@ -403,7 +422,7 @@ const JobSeekerDashboard = () => {
                 onClick={() => setActiveTab("external")}
                 className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                   activeTab === "external"
-                    ? "border-indigo-500 text-indigo-600"
+                    ? "border-gray-900 text-gray-900"
                     : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 }`}
               >
@@ -493,7 +512,7 @@ const JobSeekerDashboard = () => {
                             )}
                           </div>
                         </div>
-                        {/* CHANGE: Apply Button - Opens modal for application form */}
+                        {/* Apply Button - Opens modal for application form */}
                         <div className="ml-4">
                           {appliedJobIds.has(job.id) ? (
                             <span className="inline-flex items-center px-4 py-2 bg-green-100 text-green-800 text-sm font-medium rounded-lg">
@@ -505,7 +524,7 @@ const JobSeekerDashboard = () => {
                           ) : (
                             <button
                               onClick={() => openApplyModal(job)}
-                              className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors"
+                              className="inline-flex items-center px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
                             >
                               Apply Now
                             </button>
@@ -531,7 +550,7 @@ const JobSeekerDashboard = () => {
               </div>
             )}
 
-            {/* CHANGE: Applied Jobs Tab */}
+            {/* Applied Jobs Tab */}
             {activeTab === "applied" && (
               <div className="space-y-4">
                 {appliedJobs.length === 0 ? (
@@ -543,7 +562,7 @@ const JobSeekerDashboard = () => {
                     <p className="mt-1 text-gray-500">Start applying to jobs to track your applications here.</p>
                     <button
                       onClick={() => setActiveTab("browse")}
-                      className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                      className="mt-4 px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
                     >
                       Browse Jobs
                     </button>
@@ -809,7 +828,7 @@ const JobSeekerDashboard = () => {
                               href={job.applyUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors"
+                              className="inline-flex items-center px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
                             >
                               Apply on {job.source}
                               <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -895,7 +914,7 @@ const JobSeekerDashboard = () => {
                       value={applicationForm.phone}
                       onChange={handleFormChange}
                       required
-                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
                     />
                     <p className="mt-1 text-xs text-gray-500">Recruiters will use this to contact you</p>
                   </div>
@@ -912,7 +931,7 @@ const JobSeekerDashboard = () => {
                       placeholder="e.g. Pune, Mumbai, Remote"
                       value={applicationForm.locationPreference}
                       onChange={handleFormChange}
-                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
                     />
                   </div>
 
@@ -928,7 +947,7 @@ const JobSeekerDashboard = () => {
                       placeholder="e.g. JavaScript, React, Node.js, SQL"
                       value={applicationForm.skills}
                       onChange={handleFormChange}
-                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
                     />
                     <p className="mt-1 text-xs text-gray-500">Separate skills with commas</p>
                   </div>
@@ -945,7 +964,7 @@ const JobSeekerDashboard = () => {
                       placeholder="Tell the recruiter why you're a great fit for this role..."
                       value={applicationForm.coverNote}
                       onChange={handleFormChange}
-                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none"
+                      className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all resize-none"
                     />
                   </div>
                 </div>
@@ -962,7 +981,7 @@ const JobSeekerDashboard = () => {
                   <button
                     type="submit"
                     disabled={isSubmittingApplication}
-                    className="px-5 py-2.5 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center"
+                    className="px-5 py-2.5 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center"
                   >
                     {isSubmittingApplication ? (
                       <>
