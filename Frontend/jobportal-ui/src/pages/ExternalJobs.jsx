@@ -3,16 +3,26 @@
  * ==================
  * Displays jobs from external platforms (LinkedIn, Indeed, Glassdoor, Remotive, etc.)
  * Uses the external-jobs API endpoints
+ * Auth-aware: Shows different navigation for logged-in users
  */
 
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect, useContext } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 import { searchExternalJobs } from "../api/jobsApi";
 
 const ExternalJobs = () => {
+  const { auth, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
+  
   const [jobs, setJobs] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  
+  // Auth state
+  const isLoggedIn = !!auth?.token;
+  const isJobSeeker = auth?.user?.role === "jobseeker";
+  const isEmployer = auth?.user?.role === "employer";
   
   // Search State
   const [keyword, setKeyword] = useState("software developer");
@@ -80,9 +90,14 @@ const ExternalJobs = () => {
     }
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
+      {/* Navigation - Auth Aware */}
       <nav className="bg-white border-b border-gray-200 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
@@ -90,14 +105,37 @@ const ExternalJobs = () => {
               JobPortal
             </Link>
             <div className="hidden md:flex items-center gap-6">
+              {isLoggedIn && isJobSeeker && (
+                <Link to="/jobseeker/dashboard" className="text-gray-600 hover:text-gray-900">Dashboard</Link>
+              )}
+              {isLoggedIn && isEmployer && (
+                <Link to="/employer/dashboard" className="text-gray-600 hover:text-gray-900">Dashboard</Link>
+              )}
               <Link to="/jobs" className="text-gray-600 hover:text-gray-900">Browse Jobs</Link>
               <Link to="/external-jobs" className="text-gray-900 font-medium">External Jobs</Link>
+              {isLoggedIn && isJobSeeker && (
+                <Link to="/jobseeker/profile" className="text-gray-600 hover:text-gray-900">Profile</Link>
+              )}
             </div>
             <div className="flex items-center gap-4">
-              <Link to="/login" className="text-gray-600 hover:text-gray-900 font-medium">Sign in</Link>
-              <Link to="/register" className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors">
-                Get Started
-              </Link>
+              {isLoggedIn ? (
+                <>
+                  <span className="text-sm text-gray-600 hidden sm:block">{auth?.user?.email}</span>
+                  <button
+                    onClick={handleLogout}
+                    className="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium transition-colors"
+                  >
+                    Sign out
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link to="/login" className="text-gray-600 hover:text-gray-900 font-medium">Sign in</Link>
+                  <Link to="/register" className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors">
+                    Get Started
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>

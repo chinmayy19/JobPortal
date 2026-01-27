@@ -3,19 +3,24 @@
  * ================
  * Allows anyone to browse and search jobs without logging in.
  * Shows all jobs with search and filter functionality.
+ * Auth-aware: Shows different navigation for logged-in users.
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
-import { getAllJobs } from "../api/jobsApi";
+import { AuthContext } from "../context/AuthContext";
+import { getAllJobs, applyForJob } from "../api/jobsApi";
 
 const Jobs = () => {
+  const { auth, logout } = useContext(AuthContext);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   
   const [jobs, setJobs] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [applyingJobId, setApplyingJobId] = useState(null);
+  const [successMessage, setSuccessMessage] = useState("");
   
   // Search & Filter State
   const [keyword, setKeyword] = useState(searchParams.get("keyword") || "");
@@ -66,14 +71,34 @@ const Jobs = () => {
     return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   };
 
-  const handleApplyClick = () => {
-    // Redirect to login with return URL
-    navigate("/login", { state: { from: `/jobs` } });
+  const handleApplyClick = async (jobId) => {
+    if (!auth?.token) {
+      // Redirect to login with return URL
+      navigate("/login", { state: { from: `/jobs` } });
+      return;
+    }
+    
+    // User is logged in - redirect to dashboard to apply
+    if (auth?.user?.role === "jobseeker") {
+      navigate("/jobseeker/dashboard");
+    } else {
+      navigate("/employer/dashboard");
+    }
   };
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
+
+  // Check if user is logged in
+  const isLoggedIn = !!auth?.token;
+  const isJobSeeker = auth?.user?.role === "jobseeker";
+  const isEmployer = auth?.user?.role === "employer";
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
+      {/* Navigation - Auth Aware */}
       <nav className="bg-white border-b border-gray-200 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
@@ -81,14 +106,37 @@ const Jobs = () => {
               JobPortal
             </Link>
             <div className="hidden md:flex items-center gap-6">
+              {isLoggedIn && isJobSeeker && (
+                <Link to="/jobseeker/dashboard" className="text-gray-600 hover:text-gray-900">Dashboard</Link>
+              )}
+              {isLoggedIn && isEmployer && (
+                <Link to="/employer/dashboard" className="text-gray-600 hover:text-gray-900">Dashboard</Link>
+              )}
               <Link to="/jobs" className="text-gray-900 font-medium">Browse Jobs</Link>
               <Link to="/external-jobs" className="text-gray-600 hover:text-gray-900">External Jobs</Link>
+              {isLoggedIn && isJobSeeker && (
+                <Link to="/jobseeker/profile" className="text-gray-600 hover:text-gray-900">Profile</Link>
+              )}
             </div>
             <div className="flex items-center gap-4">
-              <Link to="/login" className="text-gray-600 hover:text-gray-900 font-medium">Sign in</Link>
-              <Link to="/register" className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors">
-                Get Started
-              </Link>
+              {isLoggedIn ? (
+                <>
+                  <span className="text-sm text-gray-600 hidden sm:block">{auth?.user?.email}</span>
+                  <button
+                    onClick={handleLogout}
+                    className="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium transition-colors"
+                  >
+                    Sign out
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link to="/login" className="text-gray-600 hover:text-gray-900 font-medium">Sign in</Link>
+                  <Link to="/register" className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors">
+                    Get Started
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -207,12 +255,21 @@ const Jobs = () => {
                         </span>
                       </div>
                     </div>
-                    <button
-                      onClick={handleApplyClick}
-                      className="px-6 py-3 bg-gray-900 text-white font-medium rounded-lg hover:bg-gray-800 transition-colors"
-                    >
-                      Apply Now
-                    </button>
+                    {isLoggedIn && isJobSeeker ? (
+                      <button
+                        onClick={() => handleApplyClick(selectedJob.id)}
+                        className="px-6 py-3 bg-gray-900 text-white font-medium rounded-lg hover:bg-gray-800 transition-colors"
+                      >
+                        Apply in Dashboard
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleApplyClick(selectedJob.id)}
+                        className="px-6 py-3 bg-gray-900 text-white font-medium rounded-lg hover:bg-gray-800 transition-colors"
+                      >
+                        Apply Now
+                      </button>
+                    )}
                   </div>
 
                   <div className="mt-8">
@@ -236,25 +293,48 @@ const Jobs = () => {
                     </div>
                   )}
 
-                  <div className="mt-8 p-4 bg-blue-50 border border-blue-100 rounded-lg">
-                    <p className="text-sm text-blue-800">
-                      <span className="font-medium">Want to apply?</span> Sign in or create an account to submit your application.
-                    </p>
-                    <div className="mt-3 flex gap-3">
-                      <Link
-                        to="/login"
-                        className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-                      >
-                        Sign In
-                      </Link>
-                      <Link
-                        to="/register"
-                        className="px-4 py-2 bg-white text-blue-600 text-sm font-medium rounded-lg border border-blue-200 hover:bg-blue-50 transition-colors"
-                      >
-                        Create Account
-                      </Link>
+                  {/* Show different message based on auth state */}
+                  {!isLoggedIn ? (
+                    <div className="mt-8 p-4 bg-blue-50 border border-blue-100 rounded-lg">
+                      <p className="text-sm text-blue-800">
+                        <span className="font-medium">Want to apply?</span> Sign in or create an account to submit your application.
+                      </p>
+                      <div className="mt-3 flex gap-3">
+                        <Link
+                          to="/login"
+                          className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                          Sign In
+                        </Link>
+                        <Link
+                          to="/register"
+                          className="px-4 py-2 bg-white text-blue-600 text-sm font-medium rounded-lg border border-blue-200 hover:bg-blue-50 transition-colors"
+                        >
+                          Create Account
+                        </Link>
+                      </div>
                     </div>
-                  </div>
+                  ) : isJobSeeker ? (
+                    <div className="mt-8 p-4 bg-green-50 border border-green-100 rounded-lg">
+                      <p className="text-sm text-green-800">
+                        <span className="font-medium">Ready to apply?</span> Go to your dashboard to apply with your full profile.
+                      </p>
+                      <div className="mt-3">
+                        <Link
+                          to="/jobseeker/dashboard"
+                          className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors inline-block"
+                        >
+                          Go to Dashboard
+                        </Link>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mt-8 p-4 bg-amber-50 border border-amber-100 rounded-lg">
+                      <p className="text-sm text-amber-800">
+                        <span className="font-medium">Employer Account</span> - You're viewing as an employer. Switch to a jobseeker account to apply.
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

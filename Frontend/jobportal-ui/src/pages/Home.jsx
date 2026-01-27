@@ -3,22 +3,32 @@
  * ========================
  * Public landing page for the Job Portal with:
  * 1. Hero section with job search
- * 2. Featured jobs preview
+ * 2. Featured jobs preview (limited for non-logged-in users)
  * 3. Stats section
  * 4. Call-to-action for registration
+ * 
+ * NON-LOGGED-IN USERS: See first 3 jobs clearly, rest are blurred
+ * LOGGED-IN USERS: See all jobs and can navigate to dashboard
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 import { getAllJobs } from "../api/jobsApi";
 
 const Home = () => {
+  const { auth, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const [searchKeyword, setSearchKeyword] = useState("");
   const [searchLocation, setSearchLocation] = useState("");
   const [featuredJobs, setFeaturedJobs] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState({ jobs: 0, companies: 0, candidates: 0 });
+
+  // Auth state
+  const isLoggedIn = !!auth?.token;
+  const isJobSeeker = auth?.user?.role === "jobseeker";
+  const isEmployer = auth?.user?.role === "employer";
 
   useEffect(() => {
     fetchFeaturedJobs();
@@ -46,6 +56,11 @@ const Home = () => {
     navigate(`/jobs?keyword=${searchKeyword}&location=${searchLocation}`);
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -59,7 +74,7 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Navigation */}
+      {/* Navigation - Auth Aware */}
       <nav className="bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
@@ -69,26 +84,55 @@ const Home = () => {
               </Link>
             </div>
             <div className="hidden md:flex items-center gap-8">
+              {isLoggedIn && isJobSeeker && (
+                <Link to="/jobseeker/dashboard" className="text-gray-600 hover:text-gray-900 transition-colors">
+                  Dashboard
+                </Link>
+              )}
+              {isLoggedIn && isEmployer && (
+                <Link to="/employer/dashboard" className="text-gray-600 hover:text-gray-900 transition-colors">
+                  Dashboard
+                </Link>
+              )}
               <Link to="/jobs" className="text-gray-600 hover:text-gray-900 transition-colors">
                 Browse Jobs
               </Link>
               <Link to="/external-jobs" className="text-gray-600 hover:text-gray-900 transition-colors">
                 External Jobs
               </Link>
+              {isLoggedIn && isJobSeeker && (
+                <Link to="/jobseeker/profile" className="text-gray-600 hover:text-gray-900 transition-colors">
+                  Profile
+                </Link>
+              )}
             </div>
             <div className="flex items-center gap-4">
-              <Link
-                to="/login"
-                className="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium transition-colors"
-              >
-                Sign in
-              </Link>
-              <Link
-                to="/register"
-                className="px-5 py-2.5 bg-gray-900 text-white font-medium rounded-lg hover:bg-gray-800 transition-colors"
-              >
-                Get Started
-              </Link>
+              {isLoggedIn ? (
+                <>
+                  <span className="text-sm text-gray-600 hidden sm:block">{auth?.user?.email}</span>
+                  <button
+                    onClick={handleLogout}
+                    className="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium transition-colors"
+                  >
+                    Sign out
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    className="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium transition-colors"
+                  >
+                    Sign in
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="px-5 py-2.5 bg-gray-900 text-white font-medium rounded-lg hover:bg-gray-800 transition-colors"
+                  >
+                    Get Started
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -178,7 +222,11 @@ const Home = () => {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-10">
             <div>
               <h2 className="text-3xl font-bold text-gray-900">Latest Job Openings</h2>
-              <p className="mt-2 text-gray-600">Explore the newest opportunities on our platform</p>
+              <p className="mt-2 text-gray-600">
+                {isLoggedIn 
+                  ? "Explore all the newest opportunities on our platform" 
+                  : "Sign in to unlock all job listings and apply"}
+              </p>
             </div>
             <Link
               to="/jobs"
@@ -200,52 +248,112 @@ const Home = () => {
               <p className="text-gray-600">No jobs available at the moment. Check back soon!</p>
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {featuredJobs.map((job) => (
-                <div
-                  key={job.id}
-                  className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg hover:border-gray-300 transition-all group"
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-linear-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center shrink-0">
-                      <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                      </svg>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors truncate">
-                        {job.title}
-                      </h3>
-                      <div className="mt-2 flex flex-wrap gap-2 text-sm text-gray-500">
-                        <span className="flex items-center gap-1">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            <div className="relative">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {featuredJobs.map((job, index) => {
+                  // For non-logged-in users: first 3 jobs are visible, rest are blurred
+                  const isBlurred = !isLoggedIn && index >= 3;
+                  
+                  return (
+                    <div
+                      key={job.id}
+                      className={`bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg hover:border-gray-300 transition-all group relative ${
+                        isBlurred ? "select-none" : ""
+                      }`}
+                    >
+                      {/* Blur overlay for non-logged-in users */}
+                      {isBlurred && (
+                        <div className="absolute inset-0 bg-white/60 backdrop-blur-sm rounded-xl z-10 flex items-center justify-center">
+                          <div className="text-center p-4">
+                            <svg className="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                            <p className="text-sm font-medium text-gray-600">Sign in to view</p>
+                          </div>
+                        </div>
+                      )}
+                      
+                      <div className="flex items-start gap-4">
+                        <div className="w-12 h-12 bg-linear-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center shrink-0">
+                          <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                           </svg>
-                          {job.workLocation}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors truncate">
+                            {isBlurred ? "••••••••••" : job.title}
+                          </h3>
+                          <div className="mt-2 flex flex-wrap gap-2 text-sm text-gray-500">
+                            <span className="flex items-center gap-1">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                              </svg>
+                              {isBlurred ? "•••••" : job.workLocation}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <p className="mt-4 text-gray-600 text-sm line-clamp-2">
+                        {isBlurred ? "Sign in to see job description and requirements..." : job.description}
+                      </p>
+                      
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {isBlurred ? (
+                          <>
+                            <span className="px-2.5 py-1 text-xs font-medium bg-gray-100 text-gray-400 rounded-full">•••••</span>
+                            <span className="px-2.5 py-1 text-xs font-medium bg-gray-100 text-gray-400 rounded-full">•••••</span>
+                          </>
+                        ) : (
+                          job.requirements?.split(",").slice(0, 3).map((skill, i) => (
+                            <span
+                              key={i}
+                              className="px-2.5 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-full"
+                            >
+                              {skill.trim()}
+                            </span>
+                          ))
+                        )}
+                      </div>
+                      
+                      <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
+                        <span className="text-sm font-medium text-emerald-600">
+                          {isBlurred ? "•••••" : job.salaryRange}
+                        </span>
+                        <span className="text-xs text-gray-400">
+                          {isBlurred ? "•••" : formatDate(job.postedAt)}
                         </span>
                       </div>
                     </div>
-                  </div>
-                  
-                  <p className="mt-4 text-gray-600 text-sm line-clamp-2">{job.description}</p>
-                  
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {job.requirements?.split(",").slice(0, 3).map((skill, i) => (
-                      <span
-                        key={i}
-                        className="px-2.5 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-full"
-                      >
-                        {skill.trim()}
-                      </span>
-                    ))}
-                  </div>
-                  
-                  <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
-                    <span className="text-sm font-medium text-emerald-600">{job.salaryRange}</span>
-                    <span className="text-xs text-gray-400">{formatDate(job.postedAt)}</span>
+                  );
+                })}
+              </div>
+              
+              {/* Sign in CTA overlay for non-logged-in users */}
+              {!isLoggedIn && featuredJobs.length > 3 && (
+                <div className="mt-8 text-center p-8 bg-linear-to-r from-gray-900 to-gray-800 rounded-2xl">
+                  <h3 className="text-xl font-bold text-white">
+                    Unlock {featuredJobs.length - 3}+ More Jobs
+                  </h3>
+                  <p className="mt-2 text-gray-300">
+                    Sign in or create a free account to see all job listings and apply instantly
+                  </p>
+                  <div className="mt-6 flex flex-col sm:flex-row gap-4 justify-center">
+                    <Link
+                      to="/login"
+                      className="px-8 py-3 bg-white text-gray-900 font-semibold rounded-xl hover:bg-gray-100 transition-colors"
+                    >
+                      Sign In
+                    </Link>
+                    <Link
+                      to="/register"
+                      className="px-8 py-3 bg-transparent text-white font-semibold rounded-xl border border-gray-500 hover:border-gray-300 transition-colors"
+                    >
+                      Create Free Account
+                    </Link>
                   </div>
                 </div>
-              ))}
+              )}
             </div>
           )}
         </div>
