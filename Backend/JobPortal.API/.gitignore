@@ -1,3 +1,8 @@
 # Visual Studio
 .vs/
 .env
+
+.env.local
+.env.*.local
+**/.env
+**/.env.local

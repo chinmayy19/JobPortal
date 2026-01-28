@@ -2,7 +2,6 @@
  * External Jobs Page
  * ==================
  * Displays jobs from external platforms (LinkedIn, Indeed, Glassdoor, Remotive, etc.)
- * Uses the external-jobs API endpoints
  * Auth-aware: Shows different navigation for logged-in users
  */
 

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace JobPortal.API.Controllers
 {
-    /// <summary>
+   
     /// Controller for fetching jobs from external job platforms
     /// Aggregates jobs from multiple sources: JSearch (LinkedIn, Indeed, Glassdoor), Remotive, Arbeitnow
     /// </summary>
