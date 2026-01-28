@@ -36,7 +36,9 @@ const Home = () => {
 
   const fetchFeaturedJobs = async () => {
     try {
-      const jobs = await getAllJobs();
+      const response = await getAllJobs();
+      // Handle different response formats (array directly or wrapped in $values)
+      const jobs = Array.isArray(response) ? response : (response?.$values || response?.data || []);
       setFeaturedJobs(jobs.slice(0, 6)); // Show first 6 jobs
       setStats({
         jobs: jobs.length,
@@ -45,6 +47,7 @@ const Home = () => {
       });
     } catch (err) {
       console.error("Error fetching jobs:", err);
+      setFeaturedJobs([]); // Ensure it's always an array on error
     } finally {
       setIsLoading(false);
     }
