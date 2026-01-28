@@ -35,7 +35,10 @@ namespace JobPortal.API
             {
                 options.AddPolicy("AllowFrontend", policy =>
                 {
-                    policy.WithOrigins("http://localhost:5173", "http://localhost:5174")
+                    var allowedOrigins = Environment.GetEnvironmentVariable("ALLOWED_ORIGINS")?.Split(',') 
+                        ?? new[] { "http://localhost:5173", "http://localhost:5174" };
+                    
+                    policy.WithOrigins(allowedOrigins)
                           .AllowAnyHeader()
                           .AllowAnyMethod()
                           .AllowCredentials();
@@ -92,20 +95,28 @@ namespace JobPortal.API
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
+            // Enable Swagger in all environments (remove condition for production access)
+            app.UseSwagger();
+            app.UseSwaggerUI();
 
-            app.UseHttpsRedirection();
+            // Only redirect to HTTPS if not behind a reverse proxy handling SSL
+            if (!app.Environment.IsDevelopment())
+            {
+                // Comment out if using a load balancer/reverse proxy for SSL termination
+                // app.UseHttpsRedirection();
+            }
+            else
+            {
+                app.UseHttpsRedirection();
+            }
 
             app.UseCors("AllowFrontend");
 
-            app.UseAuthentication(); // ?? MUST be first
+            app.UseAuthentication();
             app.UseAuthorization();
 
-
+            // Health check endpoint
+            app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));
 
             app.MapControllers();
 
