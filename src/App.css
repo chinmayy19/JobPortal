@@ -1,0 +1,5 @@
+/* App styles - reset for full-width layouts */
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
