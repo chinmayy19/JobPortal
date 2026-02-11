@@ -19,61 +19,6 @@ An **Online Job Portal** web application that connects **Job Seekers** and **Emp
 
 ---
 
-## 📁 Project Structure
-
-```
-JobPortal/
-├── Backend/
-│   └── JobPortal.API/
-│       ├── JobPortal.API.sln          # Solution file
-│       └── JobPortal.API/
-│           ├── Controllers/           # API Controllers
-│           │   ├── AuthController.cs         # Login & Registration
-│           │   ├── JobsController.cs         # CRUD for jobs
-│           │   ├── JobApplicationsController.cs  # Apply & manage applications
-│           │   ├── ProfileController.cs      # User profile management
-│           │   ├── ResumeController.cs       # Resume upload
-│           │   ├── AIController.cs           # Gemini AI resume analysis
-│           │   └── ExternalJobsController.cs # External job search
-│           ├── Models/                # Entity models
-│           ├── DTOs/                  # Data Transfer Objects
-│           ├── Data/                  # EF Core DbContext
-│           ├── Services/             # Business logic & external APIs
-│           ├── Migrations/           # EF Core database migrations
-│           ├── Uploads/              # Uploaded resumes storage
-│           ├── .env.example          # Backend env template
-│           ├── Program.cs            # App entry point & configuration
-│           └── appsettings.json      # App settings (uses env variables)
-│
-├── Frontend/
-│   └── jobportal-ui/
-│       ├── src/
-│       │   ├── api/                  # API service layer (Axios)
-│       │   │   ├── axios.js          # Axios instance config
-│       │   │   ├── authApi.js        # Auth API calls
-│       │   │   ├── jobsApi.js        # Jobs API calls
-│       │   │   └── resumeApi.js      # Resume API calls
-│       │   ├── components/           # Reusable components
-│       │   ├── context/              # React context (AuthContext)
-│       │   ├── pages/                # Page components
-│       │   │   ├── Home.jsx          # Landing page
-│       │   │   ├── Jobs.jsx          # Browse jobs
-│       │   │   ├── ExternalJobs.jsx  # External job listings
-│       │   │   ├── auth/             # Login & Register pages
-│       │   │   ├── employer/         # Employer Dashboard
-│       │   │   └── jobseeker/        # JobSeeker Dashboard & Profile
-│       │   ├── App.jsx               # Routes & app layout
-│       │   └── main.jsx              # Entry point
-│       ├── .env.example              # Frontend env template
-│       ├── package.json
-│       └── vite.config.js
-│
-├── CDAC_JobPortal_README.md
-└── .gitignore
-```
-
----
-
 ## 🧩 Modules & Features
 
 ### 👤 Job Seeker
@@ -264,61 +209,10 @@ The frontend will be available at: **`http://localhost:5173`**
                               │ • Arbeitnow Jobs API     │
                               │ • JSearch Jobs API       │
                               └─────────────────────────┘
-```
-
----
-
-## ⚙️ Environment Variables Reference
-
-### Backend (`.env`)
-
-| Variable             | Required | Description                              |
-|----------------------|----------|------------------------------------------|
-| `DB_SERVER`          | ✅ Yes   | MySQL server address                     |
-| `DB_NAME`            | ✅ Yes   | Database name                            |
-| `DB_USER`            | ✅ Yes   | Database username                        |
-| `DB_PASSWORD`        | ✅ Yes   | Database password                        |
-| `JWT_KEY`            | ✅ Yes   | Secret key for JWT (min 32 chars)        |
-| `JWT_ISSUER`         | ✅ Yes   | JWT issuer (default: `JobPortal.API`)    |
-| `JWT_AUDIENCE`       | ✅ Yes   | JWT audience (default: `JobPortal.Client`) |
-| `JWT_EXPIRY_MINUTES` | ✅ Yes   | Token expiry time in minutes             |
-| `GEMINI_API_KEY`     | ❌ No    | Google Gemini API key (for AI features)  |
-| `GEMINI_MODEL`       | ❌ No    | Gemini model name                        |
-| `JSEARCH_API_KEY`    | ❌ No    | JSearch API key (for external jobs)      |
-
-### Frontend (`.env`)
-
-| Variable              | Required | Description                        |
-|-----------------------|----------|------------------------------------|
-| `VITE_API_BASE_URL`   | ✅ Yes   | Backend API URL with `/api` suffix |
-
----
-
-## 🖥️ Screenshots
-
-> _Add screenshots of the application here (Home page, Job listings, Employer dashboard, etc.)_
-
----
-
-## 🔮 Future Enhancements
-
-- Email notifications for application updates
-- Admin panel for platform management
-- AI-based job recommendations
-- Chat system between employers and jobseekers
-- Cloud deployment (AWS: S3 + EC2 + RDS)
-
 ---
 
 ## 👤 Project Details
 
-**Name:** Chinmay  
-**Course:** CDAC (Centre for Development of Advanced Computing)  
-**Project Type:** Academic Project  
+**Name:** Chinmay    
 **Repository:** [github.com/chinmayy19/JobPortal](https://github.com/chinmayy19/JobPortal)
-
 ---
-
-## 📄 License
-
-This project is developed for educational purposes only.
