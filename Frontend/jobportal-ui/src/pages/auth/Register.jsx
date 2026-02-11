@@ -11,6 +11,8 @@ const Register = () => {
     role: "jobseeker",
     phone: "",
   });
+
+  const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -22,20 +24,66 @@ const Register = () => {
       ...prev,
       [name]: value,
     }));
+
+    // Clear field error on change
+    setErrors((prev) => ({
+      ...prev,
+      [name]: "",
+    }));
+  };
+
+  // Validation Function
+  const validateForm = () => {
+    let newErrors = {};
+
+    // Full Name
+    if (!formData.fullName.trim()) {
+      newErrors.fullName = "Full name is required";
+    } else if (formData.fullName.trim().length < 3) {
+      newErrors.fullName = "Full name must be at least 3 characters";
+    }
+
+    // Email
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = "Enter a valid email address";
+    }
+
+    // Phone (Indian format)
+    const phonePattern = /^(\+91[\s]?)?[6-9]\d{9}$/;
+    if (!formData.phone.trim()) {
+      newErrors.phone = "Phone number is required";
+    } else if (!phonePattern.test(formData.phone)) {
+      newErrors.phone = "Please enter a valid phone number (e.g. +91 9876543210)";
+    }
+
+    // Password
+    if (!formData.passwordHash) {
+      newErrors.passwordHash = "Password is required";
+    } else if (formData.passwordHash.length < 6) {
+      newErrors.passwordHash = "Password must be at least 6 characters";
+    }
+
+    // Confirm Password
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = "Confirm your password";
+    } else if (formData.passwordHash !== formData.confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
     setError("");
     setSuccess("");
 
-    // Validate passwords match
-    if (formData.passwordHash !== formData.confirmPassword) {
-      setError("Passwords do not match.");
-      setIsLoading(false);
-      return;
-    }
+    if (!validateForm()) return;
+
+    setIsLoading(true);
 
     try {
       const payload = {
@@ -47,196 +95,164 @@ const Register = () => {
       };
 
       const res = await axios.post("/auth/register", payload);
-      setSuccess(res.data || "Registration successful! Please login.");
-      
-      // Redirect to login after 2 seconds
+
+      setSuccess(res.data || "Registration successful! Redirecting to login...");
+
       setTimeout(() => {
         navigate("/login");
       }, 2000);
-
     } catch (err) {
-      setError(err.response?.data || "Registration failed. Please try again.");
+      setError(
+        err.response?.data || "Registration failed. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen w-full flex">
-      {/* Left Panel - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gray-900 text-white flex-col justify-between p-12">
-        <div>
-          <h1 className="text-2xl font-bold">JobPortal</h1>
-        </div>
-        
-        <div className="space-y-6">
-          <h2 className="text-4xl font-bold leading-tight">
-            Start your journey<br />with us today.
-          </h2>
-          <p className="text-gray-400 text-lg">
-            Create an account to find your dream job or hire the perfect candidate.
-          </p>
-        </div>
-
-        <p className="text-gray-500 text-sm">
-          © 2026 JobPortal. All rights reserved.
-        </p>
-      </div>
-
-      {/* Right Panel - Register Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center bg-gray-50 px-6 py-12">
+    <div className="min-h-screen flex">
+      {/* Right Panel */}
+      <div className="w-full flex items-center justify-center bg-gray-50 px-6 py-12">
         <div className="w-full max-w-md">
-          {/* Mobile Logo */}
-          <div className="lg:hidden text-center mb-8">
-            <h1 className="text-2xl font-bold text-gray-900">JobPortal</h1>
-          </div>
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">
+            Create an account
+          </h2>
+          <p className="text-gray-600 mb-6">
+            Fill in your details to get started
+          </p>
 
-          {/* Header */}
-          <div className="mb-8">
-            <h2 className="text-3xl font-bold text-gray-900">Create an account</h2>
-            <p className="mt-2 text-gray-600">Fill in your details to get started</p>
-          </div>
-
-          {/* Error Message */}
+          {/* API Error */}
           {error && (
-            <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm">
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded">
               {error}
             </div>
           )}
 
-          {/* Success Message */}
+          {/* Success */}
           {success && (
-            <div className="mb-6 p-4 rounded-lg bg-green-50 border border-green-200 text-green-600 text-sm">
+            <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-600 text-sm rounded">
               {success}
             </div>
           )}
 
-          {/* Form */}
           <form onSubmit={handleRegister} className="space-y-5">
-            {/* Full Name Field */}
+            {/* Full Name */}
             <div>
-              <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-2">
-                Full Name
-              </label>
+              <label className="text-sm font-medium">Full Name</label>
               <input
-                id="fullName"
                 name="fullName"
-                type="text"
-                placeholder="John Doe"
                 value={formData.fullName}
                 onChange={handleChange}
-                required
-                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
+                placeholder="John Doe"
+                className={`w-full px-4 py-2 border rounded-lg ${
+                  errors.fullName ? "border-red-500" : "border-gray-300"
+                }`}
               />
+              {errors.fullName && (
+                <p className="text-red-500 text-sm">{errors.fullName}</p>
+              )}
             </div>
 
-            {/* Email Field */}
+            {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email address
-              </label>
+              <label className="text-sm font-medium">Email</label>
               <input
-                id="email"
                 name="email"
-                type="email"
-                placeholder="name@example.com"
                 value={formData.email}
                 onChange={handleChange}
-                required
-                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
+                placeholder="name@example.com"
+                className={`w-full px-4 py-2 border rounded-lg ${
+                  errors.email ? "border-red-500" : "border-gray-300"
+                }`}
               />
+              {errors.email && (
+                <p className="text-red-500 text-sm">{errors.email}</p>
+              )}
             </div>
 
-            {/* Phone Field */}
+            {/* Phone */}
             <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                Phone Number
-              </label>
+              <label className="text-sm font-medium">Phone</label>
               <input
-                id="phone"
                 name="phone"
-                type="tel"
-                placeholder="+91 9876543210"
                 value={formData.phone}
                 onChange={handleChange}
-                required
-                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
+                placeholder="+91 9876543210"
+                className={`w-full px-4 py-2 border rounded-lg ${
+                  errors.phone ? "border-red-500" : "border-gray-300"
+                }`}
               />
+              {errors.phone && (
+                <p className="text-red-500 text-sm">{errors.phone}</p>
+              )}
             </div>
 
-            {/* Role Selection */}
+            {/* Role */}
             <div>
-              <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-2">
-                I am a
-              </label>
+              <label className="text-sm font-medium">I am a</label>
               <select
-                id="role"
                 name="role"
                 value={formData.role}
                 onChange={handleChange}
-                required
-                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
+                className="w-full px-4 py-2 border rounded-lg border-gray-300"
               >
                 <option value="jobseeker">Job Seeker</option>
                 <option value="employer">Employer</option>
               </select>
             </div>
 
-            {/* Password Field */}
+            {/* Password */}
             <div>
-              <label htmlFor="passwordHash" className="block text-sm font-medium text-gray-700 mb-2">
-                Password
-              </label>
+              <label className="text-sm font-medium">Password</label>
               <input
-                id="passwordHash"
-                name="passwordHash"
                 type="password"
-                placeholder="Create a strong password"
+                name="passwordHash"
                 value={formData.passwordHash}
                 onChange={handleChange}
-                required
-                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
+                placeholder="Minimum 6 characters"
+                className={`w-full px-4 py-2 border rounded-lg ${
+                  errors.passwordHash ? "border-red-500" : "border-gray-300"
+                }`}
               />
+              {errors.passwordHash && (
+                <p className="text-red-500 text-sm">{errors.passwordHash}</p>
+              )}
             </div>
 
-            {/* Confirm Password Field */}
+            {/* Confirm Password */}
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                Confirm Password
-              </label>
+              <label className="text-sm font-medium">Confirm Password</label>
               <input
-                id="confirmPassword"
-                name="confirmPassword"
                 type="password"
-                placeholder="Confirm your password"
+                name="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                required
-                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
+                className={`w-full px-4 py-2 border rounded-lg ${
+                  errors.confirmPassword ? "border-red-500" : "border-gray-300"
+                }`}
               />
+              {errors.confirmPassword && (
+                <p className="text-red-500 text-sm">
+                  {errors.confirmPassword}
+                </p>
+              )}
             </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 px-4 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-gray-900 text-white py-2 rounded-lg hover:bg-gray-800 disabled:opacity-50"
             >
-              {isLoading ? "Creating account..." : "Create account"}
+              {isLoading ? "Creating account..." : "Create Account"}
             </button>
           </form>
 
-          {/* Sign In Link */}
-          <p className="mt-8 text-center text-gray-600">
+          <p className="mt-6 text-center text-gray-600">
             Already have an account?{" "}
-            <Link to="/login" className="text-gray-900 font-semibold hover:underline">
+            <Link to="/login" className="font-semibold hover:underline">
               Sign in
             </Link>
-          </p>
-
-          {/* Mobile Footer */}
-          <p className="lg:hidden mt-12 text-center text-gray-400 text-sm">
-            © 2026 JobPortal. All rights reserved.
           </p>
         </div>
       </div>
@@ -245,3 +261,4 @@ const Register = () => {
 };
 
 export default Register;
+
