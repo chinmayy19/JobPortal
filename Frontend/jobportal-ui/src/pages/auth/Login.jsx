@@ -1,3 +1,4 @@
+
 import { useState, useContext } from "react";
 import axios from "../../api/axios";
 import { AuthContext } from "../../context/AuthContext";
@@ -7,54 +8,102 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [apiError, setApiError] = useState("");
+  const [errors, setErrors] = useState({});
+
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  // Validate Form
+  const validateForm = () => {
+    let newErrors = {};
+
+    if (!email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = "Enter a valid email";
+    }
+
+    if (!password.trim()) {
+      newErrors.password = "Password is required";
+    } else if (password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Safe JWT Decode
+  const getRoleFromToken = (token) => {
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      return (
+        payload.role ||
+        payload[
+          "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+        ] ||
+        ""
+      ).toLowerCase();
+    } catch {
+      return "";
+    }
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
+    setApiError("");
+
+    if (!validateForm()) return;
+
     setIsLoading(true);
-    setError("");
+
     try {
       const res = await axios.post("/auth/login", {
         email,
         password,
       });
 
-      login(res.data.token);
+      const token = res.data.token;
 
-      const decodedToken = JSON.parse(atob(res.data.token.split(".")[1]));
-      // Handle both possible role claim formats
-      const role = (decodedToken.role || decodedToken["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || "").toLowerCase();
+      if (!token) {
+        setApiError("Login failed. Token not received.");
+        setIsLoading(false);
+        return;
+      }
 
-      console.log("Decoded token:", decodedToken);
-      console.log("User role:", role);
+      login(token);
 
-      if (role === "jobseeker") navigate("/jobseeker/dashboard");
-      else if (role === "employer") navigate("/employer/dashboard");
-      else navigate("/login"); // Fallback to login if role unknown
+      const role = getRoleFromToken(token);
 
+      if (role === "jobseeker") {
+        navigate("/jobseeker/dashboard");
+      } else if (role === "employer") {
+        navigate("/employer/dashboard");
+      } else {
+        navigate("/");
+      }
     } catch (err) {
-      setError("Invalid credentials. Please try again.");
+      setApiError(
+        err.response?.data?.message || "Invalid credentials. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen w-full flex">
-      {/* Left Panel - Branding */}
+    <div className="min-h-screen flex">
+      {/* Left Panel */}
       <div className="hidden lg:flex lg:w-1/2 bg-gray-900 text-white flex-col justify-between p-12">
+        <h1 className="text-2xl font-bold">JobPortal</h1>
+
         <div>
-          <h1 className="text-2xl font-bold">JobPortal</h1>
-        </div>
-        
-        <div className="space-y-6">
-          <h2 className="text-4xl font-bold leading-tight">
+          <h2 className="text-4xl font-bold">
             Find your dream job<br />or the perfect candidate.
           </h2>
-          <p className="text-gray-400 text-lg">
-            Connect with thousands of employers and job seekers on our platform.
+          <p className="text-gray-400 mt-4">
+            Connect with thousands of employers and job seekers.
           </p>
         </div>
 
@@ -63,82 +112,91 @@ const Login = () => {
         </p>
       </div>
 
-      {/* Right Panel - Login Form */}
+      {/* Right Panel */}
       <div className="w-full lg:w-1/2 flex items-center justify-center bg-gray-50 px-6 py-12">
         <div className="w-full max-w-md">
-          {/* Mobile Logo */}
-          <div className="lg:hidden text-center mb-8">
-            <h1 className="text-2xl font-bold text-gray-900">JobPortal</h1>
-          </div>
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">
+            Welcome back
+          </h2>
+          <p className="text-gray-600 mb-6">
+            Sign in to your account
+          </p>
 
-          {/* Header */}
-          <div className="mb-8">
-            <h2 className="text-3xl font-bold text-gray-900">Welcome back</h2>
-            <p className="mt-2 text-gray-600">Sign in to your account to continue</p>
-          </div>
-
-          {/* Error Message */}
-          {error && (
-            <div className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm">
-              {error}
+          {/* API Error */}
+          {apiError && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded">
+              {apiError}
             </div>
           )}
 
-          {/* Form */}
-          <form onSubmit={handleLogin} className="space-y-6">
-            {/* Email Field */}
+          <form onSubmit={handleLogin} className="space-y-5">
+            {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email address
+              <label className="block text-sm font-medium mb-1">
+                Email
               </label>
               <input
-                id="email"
                 type="email"
-                placeholder="name@example.com"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setErrors({ ...errors, email: "" });
+                }}
+                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 ${
+                  errors.email ? "border-red-500" : "border-gray-300"
+                }`}
+                placeholder="name@example.com"
               />
+              {errors.email && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.email}
+                </p>
+              )}
             </div>
 
-            {/* Password Field */}
+            {/* Password */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium mb-1">
                 Password
               </label>
               <input
-                id="password"
                 type="password"
-                placeholder="Enter your password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setErrors({ ...errors, password: "" });
+                }}
+                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 ${
+                  errors.password ? "border-red-500" : "border-gray-300"
+                }`}
+                placeholder="Enter password"
               />
+              {errors.password && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.password}
+                </p>
+              )}
             </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 px-4 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-gray-900 text-white py-2 rounded-lg hover:bg-gray-800 disabled:opacity-50"
             >
-              {isLoading ? "Signing in..." : "Sign in"}
+              {isLoading ? "Signing in..." : "Sign In"}
             </button>
           </form>
 
-          {/* Sign Up Link */}
-          <p className="mt-8 text-center text-gray-600">
+          <p className="mt-6 text-center text-gray-600">
             Don't have an account?{" "}
-            <Link to="/register" className="text-gray-900 font-semibold hover:underline">
+            <Link
+              to="/register"
+              className="font-semibold text-gray-900 hover:underline"
+            >
               Create an account
             </Link>
-          </p>
-
-          {/* Mobile Footer */}
-          <p className="lg:hidden mt-12 text-center text-gray-400 text-sm">
-            © 2026 JobPortal. All rights reserved.
           </p>
         </div>
       </div>
@@ -147,3 +205,4 @@ const Login = () => {
 };
 
 export default Login;
+
